@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+config/local.env
+work/
+
+# Generated inputs/results and external credentials never belong in this public supplement.
+.env
+.env.*
+config/*.private.json
+private/
+results/
+reports/
+operations/
+.pytest_cache/

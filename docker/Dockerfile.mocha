@@ -1,0 +1,27 @@
+# Reproduction recipe for the locally installed mva-mocha:bcftools-1.20-95686b7 image.
+# It intentionally compiles MoChA against the same bcftools 1.20 source tree.
+FROM debian@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171
+
+ARG BCFTOOLS_VERSION=1.20
+ARG BCFTOOLS_SHA256=312b8329de5130dd3a37678c712951e61e5771557c7129a70a327a300fda8620
+ARG MOCHA_COMMIT=95686b7b65f53a490513be76bb120e5fc20a8bcf
+
+LABEL org.opencontainers.image.source="https://github.com/freeseek/mocha" \
+      org.opencontainers.image.revision="${MOCHA_COMMIT}" \
+      org.opencontainers.image.version="bcftools-${BCFTOOLS_VERSION}"
+
+RUN apt-get update && apt-get install -y --no-install-recommends bzip2 ca-certificates curl gcc libbz2-dev libcurl4-openssl-dev liblzma-dev libssl-dev make zlib1g-dev \
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p /opt/src /opt/mocha \
+ && curl -fsSL -o /opt/src/bcftools.tar.bz2 "https://github.com/samtools/bcftools/releases/download/${BCFTOOLS_VERSION}/bcftools-${BCFTOOLS_VERSION}.tar.bz2" \
+ && echo "${BCFTOOLS_SHA256}  /opt/src/bcftools.tar.bz2" | sha256sum -c - \
+ && tar -xjf /opt/src/bcftools.tar.bz2 -C /opt/src \
+ && cd "/opt/src/bcftools-${BCFTOOLS_VERSION}" \
+ && for f in mocha.h beta_binom.h genome_rules.h mocha.c mochatools.c extendFMT.c; do curl -fsSL -o "plugins/$f" "https://raw.githubusercontent.com/freeseek/mocha/${MOCHA_COMMIT}/$f"; done \
+ && make -j1 \
+ && cp bcftools plugins/{fill-tags,fixploidy,mocha,mochatools,extendFMT}.so /opt/mocha/ \
+ && (BCFTOOLS_PLUGINS=/opt/mocha /opt/mocha/bcftools +mocha -g list >/dev/null || [ "$?" -eq 1 ]) \
+ && rm -rf /opt/src
+
+ENV PATH=/opt/mocha:$PATH BCFTOOLS_PLUGINS=/opt/mocha
+ENTRYPOINT ["bcftools"]
