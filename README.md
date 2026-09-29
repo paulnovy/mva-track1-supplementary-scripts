@@ -1,6 +1,6 @@
 # MVA Track 1 supplementary scripts
 
-Reproducible, case-focused scripts used after the primary WGS workflow. The bundle contains methods, not patient data or biological results. It is research software and is not a diagnostic pipeline.
+**[Carbon-DeCoder](https://github.com/paulnovy/Carbon-DeCoder) provided the automated foundation for the Track 1 analyses**, including primary whole-genome processing and workflow orchestration. This repository contains the supplementary, case-focused analysis and audit scripts that build on those automated outputs. The bundle contains methods, not patient data or biological results. It is research software, not a diagnostic pipeline.
 
 ## Start here
 
